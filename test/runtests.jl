@@ -1,6 +1,5 @@
-using Test
-import GenericLinearAlgebra
-import GenericLinearAlgebra: Ac_mul_A_RFP, TriangularRFP
+using Test, LinearAlgebra
+import RectangularFullPacked: Ac_mul_A_RFP, TriangularRFP
 
 @testset "Rectuangular Full Pack Format" begin
 

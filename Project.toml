@@ -1,0 +1,13 @@
+name = "RectangularFullPacked"
+uuid = "27983f2f-6524-42ba-a408-2b5a31c238e4"
+version = "0.0.1"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+libblastrampoline_jll = "8e850b90-86db-534c-a0d3-1478176c7d93"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
