@@ -110,10 +110,12 @@ struct TriangularRFP{T<:BlasFloat} <: AbstractMatrix{T}
 end
 
 function TriangularRFP(A::StridedMatrix, uplo::Symbol = :U)
+    n = size(A, 2)
+    Arf = similar(A, (n * (n + 1)) >> 1)
     if uplo == :U
-        return TriangularRFP(LAPACK_RFP.trttf!('N', 'U', A), 'N', 'U')
+        return TriangularRFP(LAPACK_RFP.trttf!(Arf, 'N', 'U', A), 'N', 'U')
     elseif uplo == :L
-        return TriangularRFP(LAPACK_RFP.trttf!('N', 'L', A), 'N', 'L')
+        return TriangularRFP(LAPACK_RFP.trttf!(Arf, 'N', 'L', A), 'N', 'L')
     else
         throw(ArgumentError("uplo must be either :U or :L but was :$uplo"))
     end
@@ -134,10 +136,12 @@ function Base.size(A::TriangularRFP)
 end
 
 Base.copy(A::TriangularRFP) = TriangularRFP(copy(A.data), A.transr, A.uplo)
-
-function Base.Array(A::TriangularRFP)
-    C = LAPACK_RFP.tfttr!(A.transr, A.uplo, A.data)
-    if A.uplo == 'U'
+    
+function Base.Array(Arf::TriangularRFP{T}) where {T}
+    n = round(Int, div(sqrt(8length(Arf.data)), 2))
+    C = zeros(T, (n, n))
+    LAPACK_RFP.tfttr!(C, Arf.transr, Arf.uplo, Arf.data)
+    if Arf.uplo == 'U'
         return triu!(C)
     else
         return tril!(C)

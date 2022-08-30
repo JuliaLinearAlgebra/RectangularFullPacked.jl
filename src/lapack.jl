@@ -2,7 +2,7 @@ module LAPACK_RFP
 
 using libblastrampoline_jll
 using LinearAlgebra
-using LinearAlgebra: BlasInt, chkstride1, LAPACKException
+using LinearAlgebra: BlasInt, checksquare, chkstride1, LAPACKException
 using LinearAlgebra.BLAS: @blasfunc
 using LinearAlgebra.LAPACK: chkdiag, chkside, chkuplo
 
@@ -295,11 +295,15 @@ for (f, elty) in (
 )
 
     @eval begin
-        function tfttr!(transr::Char, uplo::Char, Arf::StridedVector{$elty})
+        function tfttr!(A::StridedMatrix{$elty}, transr::Char, uplo::Char, Arf::StridedVector{$elty})
             chkuplo(uplo)
-            n = round(Int, div(sqrt(8length(Arf)), 2))
             info = Ref{BlasInt}()
-            A = similar(Arf, $elty, n, n)
+            chkstride1(A)
+            n = checksquare(A)
+            trgt = (n * (n + 1)) >> 1
+            length(Arf) == trgt ||
+                throw(DimensionMismatch("RFP storage for ($m, $n) array is $(length(Arf)) ≠ $trgt"))
+            lda = max(1, stride(A, 2))
 
             ccall(
                 (@blasfunc($f), liblapack_name),
@@ -318,7 +322,7 @@ for (f, elty) in (
                 n,
                 Arf,
                 A,
-                n,
+                lda,
                 info,
             )
 
@@ -336,13 +340,15 @@ for (f, elty) in (
 )
 
     @eval begin
-        function trttf!(transr::Char, uplo::Char, A::StridedMatrix{$elty})
+        function trttf!(Arf::StridedVector{$elty}, transr::Char, uplo::Char, A::StridedMatrix{$elty})
             chkuplo(uplo)
             chkstride1(A)
             n = size(A, 1)
             lda = max(1, stride(A, 2))
             info = Ref{BlasInt}()
-            Arf = similar(A, $elty, div(n * (n + 1), 2))
+            Arflen = div(n * (n + 1), 2)
+            length(Arf) == Arflen ||
+                throw(DimensionMismatch("length(Arf) = $(length(Arf)), should be $Arflen")) 
 
             ccall(
                 (@blasfunc($f), liblapack_name),
