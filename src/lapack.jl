@@ -80,12 +80,12 @@ for (f, elty) in (
         function pftrf!(transr::Char, uplo::Char, A::StridedVector{$elty})
             chkuplo(uplo)
             n = round(Int, div(sqrt(8length(A)), 2))
-            info = Vector{BlasInt}(undef, 1)
+            info = Ref{BlasInt}()
 
             ccall(
                 (@blasfunc($f), liblapack_name),
                 Cvoid,
-                (Ref{UInt8}, Ref{UInt8}, Ref{BlasInt}, Ptr{$elty}, Ptr{BlasInt}),
+                (Ref{UInt8}, Ref{UInt8}, Ref{BlasInt}, Ptr{$elty}, Ref{BlasInt}),
                 transr,
                 uplo,
                 n,
@@ -109,12 +109,12 @@ for (f, elty) in (
         function pftri!(transr::Char, uplo::Char, A::StridedVector{$elty})
             chkuplo(uplo)
             n = round(Int, div(sqrt(8length(A)), 2))
-            info = Vector{BlasInt}(undef, 1)
+            info = Ref{BlasInt}()
 
             ccall(
                 (@blasfunc($f), liblapack_name),
                 Cvoid,
-                (Ref{UInt8}, Ref{UInt8}, Ref{BlasInt}, Ptr{$elty}, Ptr{BlasInt}),
+                (Ref{UInt8}, Ref{UInt8}, Ref{BlasInt}, Ptr{$elty}, Ref{BlasInt}),
                 transr,
                 uplo,
                 n,
@@ -150,7 +150,7 @@ for (f, elty) in (
             end
             nhrs = size(B, 2)
             ldb = max(1, stride(B, 2))
-            info = Vector{BlasInt}(undef, 1)
+            info = Ref{BlasInt}()
 
             ccall(
                 (@blasfunc($f), liblapack_name),
@@ -163,7 +163,7 @@ for (f, elty) in (
                     Ptr{$elty},
                     Ptr{$elty},
                     Ref{BlasInt},
-                    Ptr{BlasInt},
+                    Ref{BlasInt},
                 ),
                 transr,
                 uplo,
@@ -260,7 +260,7 @@ for (f, elty) in (
             chkuplo(uplo)
             chkdiag(diag)
             n = round(Int, div(sqrt(8length(A)), 2))
-            info = Vector{BlasInt}(undef, 1)
+            info = Ref{BlasInt}()
 
             ccall(
                 (@blasfunc($f), liblapack_name),
@@ -271,7 +271,7 @@ for (f, elty) in (
                     Ref{UInt8},
                     Ref{BlasInt},
                     Ptr{$elty},
-                    Ptr{BlasInt},
+                    Ref{BlasInt},
                 ),
                 transr,
                 uplo,
@@ -298,7 +298,7 @@ for (f, elty) in (
         function tfttr!(transr::Char, uplo::Char, Arf::StridedVector{$elty})
             chkuplo(uplo)
             n = round(Int, div(sqrt(8length(Arf)), 2))
-            info = Vector{BlasInt}(undef, 1)
+            info = Ref{BlasInt}()
             A = similar(Arf, $elty, n, n)
 
             ccall(
@@ -311,7 +311,7 @@ for (f, elty) in (
                     Ptr{$elty},
                     Ptr{$elty},
                     Ref{BlasInt},
-                    Ptr{BlasInt},
+                    Ref{BlasInt},
                 ),
                 transr,
                 uplo,
@@ -341,7 +341,7 @@ for (f, elty) in (
             chkstride1(A)
             n = size(A, 1)
             lda = max(1, stride(A, 2))
-            info = Vector{BlasInt}(undef, 1)
+            info = Ref{BlasInt}()
             Arf = similar(A, $elty, div(n * (n + 1), 2))
 
             ccall(
@@ -354,7 +354,7 @@ for (f, elty) in (
                     Ptr{$elty},
                     Ref{BlasInt},
                     Ptr{$elty},
-                    Ptr{BlasInt},
+                    Ref{BlasInt},
                 ),
                 transr,
                 uplo,
