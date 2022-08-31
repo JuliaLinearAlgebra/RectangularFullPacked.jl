@@ -26,7 +26,7 @@ for (f, elty, relty) in (
             alpha::Real,
             A::StridedMatrix{$elty},
             beta::Real,
-            C::StridedVector{$elty},
+            C::StridedVecOrMat{$elty},
         )
             chkuplo(uplo)
             chkstride1(A)
@@ -77,7 +77,7 @@ for (f, elty) in (
 )
 
     @eval begin
-        function pftrf!(transr::Char, uplo::Char, A::StridedVector{$elty})
+        function pftrf!(transr::Char, uplo::Char, A::StridedVecOrMat{$elty})
             chkuplo(uplo)
             n = round(Int, div(sqrt(8length(A)), 2))
             info = Ref{BlasInt}()
@@ -106,7 +106,7 @@ for (f, elty) in (
 )
 
     @eval begin
-        function pftri!(transr::Char, uplo::Char, A::StridedVector{$elty})
+        function pftri!(transr::Char, uplo::Char, A::StridedVecOrMat{$elty})
             chkuplo(uplo)
             n = round(Int, div(sqrt(8length(A)), 2))
             info = Ref{BlasInt}()
@@ -139,7 +139,7 @@ for (f, elty) in (
         function pftrs!(
             transr::Char,
             uplo::Char,
-            A::StridedVector{$elty},
+            A::StridedVecOrMat{$elty},
             B::StridedVecOrMat{$elty},
         )
             chkuplo(uplo)
@@ -196,18 +196,20 @@ for (f, elty) in (
             trans::Char,
             diag::Char,
             alpha::$elty,
-            A::StridedVector{$elty},
+            A::StridedMatrix{$elty},
             B::StridedVecOrMat{$elty},
         )
             chkuplo(uplo)
             chkside(side)
             chkdiag(diag)
+            chkstride1(A)
             chkstride1(B)
             m, n = size(B, 1), size(B, 2)
-            if round(Int, div(sqrt(8length(A)), 2)) != m
+            k, l = size(A)
+            if k - (2l ≤ k) != m
                 throw(
                     DimensionMismatch(
-                        "First dimension of B must equal $(round(Int, div(sqrt(8length(A)), 2))), got $m",
+                        "First dimension of B must equal $(k - (2l ≤ k)), got $m",
                     ),
                 )
             end
@@ -256,10 +258,12 @@ for (f, elty) in (
 )
 
     @eval begin
-        function tftri!(transr::Char, uplo::Char, diag::Char, A::StridedVector{$elty})
+        function tftri!(transr::Char, uplo::Char, diag::Char, A::StridedMatrix{$elty})
             chkuplo(uplo)
             chkdiag(diag)
-            n = round(Int, div(sqrt(8length(A)), 2))
+            chkstride1(A)
+            k, l = size(A)
+            n = k - (2l ≤ k)
             info = Ref{BlasInt}()
 
             ccall(
@@ -295,7 +299,7 @@ for (f, elty) in (
 )
 
     @eval begin
-        function tfttr!(A::StridedMatrix{$elty}, transr::Char, uplo::Char, Arf::StridedVector{$elty})
+        function tfttr!(A::StridedMatrix{$elty}, transr::Char, uplo::Char, Arf::StridedVecOrMat{$elty})
             chkuplo(uplo)
             info = Ref{BlasInt}()
             chkstride1(A)
@@ -340,13 +344,13 @@ for (f, elty) in (
 )
 
     @eval begin
-        function trttf!(Arf::StridedVector{$elty}, transr::Char, uplo::Char, A::StridedMatrix{$elty})
+        function trttf!(Arf::StridedVecOrMat{$elty}, transr::Char, uplo::Char, A::StridedMatrix{$elty})
             chkuplo(uplo)
             chkstride1(A)
             n = size(A, 1)
             lda = max(1, stride(A, 2))
             info = Ref{BlasInt}()
-            Arflen = div(n * (n + 1), 2)
+            Arflen = (n * (n + 1)) >> 1
             length(Arf) == Arflen ||
                 throw(DimensionMismatch("length(Arf) = $(length(Arf)), should be $Arflen")) 
 
