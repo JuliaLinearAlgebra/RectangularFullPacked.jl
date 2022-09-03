@@ -5,15 +5,16 @@ function checkbounds(A::AbstractRFP, i::Integer, j::Integer)
 end
 
 """
-    _packedinds(A::AbstractRFP, ij::NTuple{2,Int}, n, k, l)
+    _packedinds(A::AbstractRFP, i, j, neven, l)
 
 Returns an index tuple into `A.data` where `ij` is in the correct index range and correct triangle
 
 The triangle is checked before entry to this function because `ij` not being in the `A.uplo` triangle
 is handled differently for triangular, which returns `zero(T)` and Hermitian, which returns the
-conjugate of the `reverse(ij)` element.
+conjugate of `A[j, i]`.
 
-`n`, `k`, and `l` are already calculated so they are passed to this function
+`l`, the smaller dimension of the parent array, and `neven`, whether the virtual
+size `n` is even, are already calculated and are passed to this function
 """
 function _packedinds(A::AbstractRFP, i::Integer, j::Integer, neven::Bool, l::Int)
     A.transr == 'N' || throw(ArgumentError("Code for A.transr ≠ 'N' not yet written"))

@@ -4,7 +4,10 @@ struct HermitianRFP{T<:BlasFloat} <: AbstractRFP{T}
     uplo::Char
 end
 
-HermitianRFP(A::TriangularRFP) = HermitianRFP(A.data, A.transr, A.uplo)
+# For a Hermitian matrix the diagonal elements must be real.
+# Hence fhis conversion cannot be done without copying A.data.
+
+#HermitianRFP(A::TriangularRFP) = HermitianRFP(A.data, A.transr, A.uplo)
 
 function Base.getindex(A::HermitianRFP, i::Integer, j::Integer)
     (A.uplo == 'L' ? i < j : i > j) && return conj(getindex(A, j, i))
