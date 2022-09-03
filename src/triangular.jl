@@ -4,16 +4,18 @@ struct TriangularRFP{T<:BlasFloat} <: AbstractRFP{T}
     uplo::Char
 end
 
-function TriangularRFP(A::StridedMatrix, uplo::Symbol = :U)
+function TriangularRFP(A::StridedMatrix{T}, uplo::Symbol = :U; transr::Symbol=:N) where {T}
     n = checksquare(A)
-    Arf = similar(A, n + iseven(n), (n + 1) >> 1)
-    if uplo == :U
-        return TriangularRFP(LAPACK_RFP.trttf!(Arf, 'N', 'U', A), 'N', 'U')
-    elseif uplo == :L
-        return TriangularRFP(LAPACK_RFP.trttf!(Arf, 'N', 'L', A), 'N', 'L')
-    else
-        throw(ArgumentError("uplo must be either :U or :L but was :$uplo"))
-    end
+    (ul = first(string(uplo))) ∈ "UL" ||
+        throw(ArgumentError("uplo = $uplo should be :U or :L"))
+    (tr = first(string(transr))) ∈ (T <: Complex ? "NC" : "NT") ||
+        throw(ArgumentError("transr = $transr should be :N or :(T <: Complex ? :C : :T)"))
+    rfdims = _parentsize(n, tr ≠ 'N')
+    return TriangularRFP(
+        LAPACK_RFP.trttf!(similar(A, first(rfdims), last(rfdims)), tr, ul, A),
+        tr,
+        ul,
+    )
 end
     
 function Base.Array(A::TriangularRFP{T}) where {T}
@@ -26,20 +28,24 @@ end
 Base.copy(A::TriangularRFP) = TriangularRFP(copy(A.data), A.transr, A.uplo)
 
 function Base.getindex(A::TriangularRFP{T}, i::Integer, j::Integer) where {T}
-    ii, jj = _packedinds(A, Int(i), Int(j))
-    return iszero(ii) ? zero(T) : A.data[ii, jj]
+    n, k, l = checkbounds(A, i, j)
+    (A.uplo == 'L' ? i < j : i > j) && return zero(T)
+    rs, doconj = _packedinds(A, Int(i), Int(j), iseven(n), l)
+    val = A.data[first(rs), last(rs)]
+    return doconj ?  conj(val) : val
 end
 
 function Base.setindex!(A::TriangularRFP{T}, x::T, i::Integer, j::Integer) where {T}
-    ii, jj = _packedinds(A, Int(i), Int(j))
-    if iszero(ii)
+    n, k, l = checkbounds(A, i, j)
+    if (A.uplo == 'L' ? i < j : i > j)
         if iszero(x)
             return x
         else
             throw(error("Attempt to assign a non-zero value to a systematic zero"))
         end
     end
-    return setindex!(A.data, x, ii, jj)
+    rs, doconj = _packedinds(A, Int(i), Int(j), iseven(n), l)
+    return setindex!(A.data, doconj ? conj(x) : x, first(rs), last(rs))
 end
 
 LinearAlgebra.inv!(A::TriangularRFP) =

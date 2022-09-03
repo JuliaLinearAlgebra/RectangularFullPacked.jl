@@ -7,8 +7,11 @@ end
 HermitianRFP(A::TriangularRFP) = HermitianRFP(A.data, A.transr, A.uplo)
 
 function Base.getindex(A::HermitianRFP, i::Integer, j::Integer)
-    ii, jj = _packedinds(A, Int(i), Int(j))
-    return iszero(ii) ? conj(A[j, i]) : A.data[ii, jj]
+    (A.uplo == 'L' ? i < j : i > j) && return conj(getindex(A, j, i))
+    n, k, l = checkbounds(A, i, j)
+    rs, doconj = _packedinds(A, Int(i), Int(j), iseven(n), l)
+    val = A.data[first(rs), last(rs)]
+    return doconj ?  conj(val) : val
 end
 
 function Ac_mul_A_RFP(A::Matrix{T}, uplo = :U) where {T<:BlasFloat}
