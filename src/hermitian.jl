@@ -1,5 +1,5 @@
 struct HermitianRFP{T<:BlasFloat} <: AbstractRFP{T}
-    data::StridedMatrix{T}
+    data::Matrix{T}
     transr::Char
     uplo::Char
 end

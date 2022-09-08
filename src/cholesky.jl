@@ -1,5 +1,5 @@
 struct CholeskyRFP{T<:BlasFloat} <: Factorization{T}
-    data::StridedMatrix{T}
+    data::Matrix{T}
     transr::Char
     uplo::Char
 end

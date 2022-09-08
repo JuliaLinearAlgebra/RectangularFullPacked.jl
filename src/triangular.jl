@@ -1,10 +1,10 @@
 struct TriangularRFP{T<:BlasFloat} <: AbstractRFP{T}
-    data::StridedMatrix{T}
+    data::Matrix{T}
     transr::Char
     uplo::Char
 end
 
-function TriangularRFP(A::StridedMatrix{T}, uplo::Symbol = :U; transr::Symbol=:N) where {T}
+function TriangularRFP(A::Matrix{T}, uplo::Symbol = :U; transr::Symbol=:N) where {T}
     n = checksquare(A)
     (ul = first(string(uplo))) ∈ "UL" ||
         throw(ArgumentError("uplo = $uplo should be :U or :L"))
