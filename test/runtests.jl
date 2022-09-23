@@ -3,7 +3,7 @@ import RectangularFullPacked: Ac_mul_A_RFP, TriangularRFP
 
 @testset "Rectangular Full Pack Format" begin
 
-    @testset "Core generic functionality: n = $n, uplo = $uplo" for n in (6, 7), uplo in (:U, :L)
+    @testset "Core generic functionality: n = $n, uplo = $uplo, transr = $transr" for n in (6, 7), uplo in (:U, :L), transr in (:N, :T)
 
         A = rand(10, n)
 
@@ -23,7 +23,7 @@ import RectangularFullPacked: Ac_mul_A_RFP, TriangularRFP
         end
 
         @testset "Triangular" begin
-            Atr_RFP = TriangularRFP(triu(A'A), uplo)
+            Atr_RFP = TriangularRFP(triu(A'A), uplo; transr)
             @test size(Atr_RFP, 1) == n
             @test size(Atr_RFP, 2) == n
             @test size(Atr_RFP, 3) == 1
@@ -46,7 +46,8 @@ import RectangularFullPacked: Ac_mul_A_RFP, TriangularRFP
             Complex{Float64},
         ),
         n in (6, 7),
-        uplo in (:L, :U)
+        uplo in (:L, :U),
+        transr in (:N, elty <: Complex ? :C : :T)
 
         A = rand(elty, 10, n)
         AcA = A'A
@@ -59,18 +60,19 @@ import RectangularFullPacked: Ac_mul_A_RFP, TriangularRFP
         @test inv(cholesky(AcA)) ≈ inv(factorize(AcA_RFP))
     end
 
-    @testset "Triangular with element type: $elty. Problem size: $n, uplo: $uplo" for elty in (
+    @testset "Triangular with element type: $elty. Problem size: $n, uplo: $uplo, transr: $transr" for elty in (
             Float32,
             Float64,
             Complex{Float32},
             Complex{Float64},
         ),
         n in (6, 7),
-        uplo in (:L, :U)
+        uplo in (:L, :U),
+        transr in (:N, elty <: Complex ? :C : :T)
 
         A = lu(rand(elty, n, n)).U
         A = uplo == :U ? A : copy(A')
-        A_RFP = TriangularRFP(A, uplo)
+        A_RFP = TriangularRFP(A, uplo; transr)
         o = ones(elty, n)
 
         @test A ≈ A_RFP

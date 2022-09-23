@@ -205,7 +205,7 @@ for (f, elty) in (
             chkstride1(A)
             chkstride1(B)
             m, n = size(B, 1), size(B, 2)
-            k, l = size(A)
+            k, l = transr == 'N' ? size(A) : reverse(size(A))
             if k - (2l ≤ k) != m
                 throw(
                     DimensionMismatch(
@@ -262,7 +262,7 @@ for (f, elty) in (
             chkuplo(uplo)
             chkdiag(diag)
             chkstride1(A)
-            k, l = size(A)
+            k, l = transr == 'N' ? size(A) : reverse(size(A))
             n = k - (2l ≤ k)
             info = Ref{BlasInt}()
 

@@ -17,17 +17,18 @@ conjugate of `A[j, i]`.
 size `n` is even, are already calculated and are passed to this function
 """
 function _packedinds(A::AbstractRFP, i::Integer, j::Integer, neven::Bool, l::Int)
-    A.transr == 'N' || throw(ArgumentError("Code for A.transr ≠ 'N' not yet written"))
-    return _packedinds(Int(i), Int(j), A.uplo == 'L', neven, l)
+    return _packedinds(Int(i), Int(j), A.uplo == 'L', neven, A.transr == 'N', l)
 end
 
-function _packedinds(i::Int, j::Int, lower::Bool, neven::Bool, l::Int)
+function _packedinds(i::Int, j::Int, lower::Bool, neven::Bool, tr::Bool, l::Int)
     if lower
         conj = l < j
-        return (conj ? (j - l, i + !neven - l) : (i + neven, j)), conj
+        inds = conj ?  (j - l, i + !neven - l) : (i + neven, j)
+    else
+        conj = (j + !neven) ≤ l
+        inds = conj ? (l + neven + j, i) : (i, j + !neven - l)
     end
-    conj = (j + !neven) ≤ l
-    return (conj ? (l + neven + j, i) : (i, j + !neven - l)), conj
+    return tr ? (inds, conj) : (reverse(inds), !conj)
 end
 
 """
