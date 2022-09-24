@@ -299,14 +299,22 @@ for (f, elty) in (
 )
 
     @eval begin
-        function tfttr!(A::StridedMatrix{$elty}, transr::Char, uplo::Char, Arf::VecOrMat{$elty})
+        function tfttr!(
+            A::StridedMatrix{$elty},
+            transr::Char,
+            uplo::Char,
+            Arf::VecOrMat{$elty},
+        )
             chkuplo(uplo)
             info = Ref{BlasInt}()
             chkstride1(A)
             n = checksquare(A)
             trgt = (n * (n + 1)) >> 1
-            length(Arf) == trgt ||
-                throw(DimensionMismatch("RFP storage for ($m, $n) array is $(length(Arf)) ≠ $trgt"))
+            length(Arf) == trgt || throw(
+                DimensionMismatch(
+                    "RFP storage for ($m, $n) array is $(length(Arf)) ≠ $trgt",
+                ),
+            )
             lda = max(1, stride(A, 2))
 
             ccall(
@@ -344,7 +352,12 @@ for (f, elty) in (
 )
 
     @eval begin
-        function trttf!(Arf::VecOrMat{$elty}, transr::Char, uplo::Char, A::StridedMatrix{$elty})
+        function trttf!(
+            Arf::VecOrMat{$elty},
+            transr::Char,
+            uplo::Char,
+            A::StridedMatrix{$elty},
+        )
             chkuplo(uplo)
             chkstride1(A)
             n = size(A, 1)
@@ -352,7 +365,7 @@ for (f, elty) in (
             info = Ref{BlasInt}()
             Arflen = (n * (n + 1)) >> 1
             length(Arf) == Arflen ||
-                throw(DimensionMismatch("length(Arf) = $(length(Arf)), should be $Arflen")) 
+                throw(DimensionMismatch("length(Arf) = $(length(Arf)), should be $Arflen"))
 
             ccall(
                 (@blasfunc($f), liblapack_name),

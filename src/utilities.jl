@@ -42,8 +42,6 @@ function _parentsize(n::Integer, tr::Bool = false)
     return tr ? reverse(sz) : sz
 end
 
-Base.parent(A::AbstractRFP) = A.data
-
 """
     _rfpsize(A::AbstractRFP)
 

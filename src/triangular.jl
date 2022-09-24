@@ -7,11 +7,11 @@ end
 function TriangularRFP(A::Matrix{T}, uplo::Symbol = :U; transr::Symbol=:N) where {T}
     n = checksquare(A)
     ul = first(string(uplo))
-    ul ∉ "UL"
+    if ul ∉ "UL"
         throw(ArgumentError("uplo = $uplo should be :U or :L"))
     end
     tr = first(string(transr))
-    tr ∉ (T <: Complex ? "NC" : "NT")
+    if tr ∉ (T <: Complex ? "NC" : "NT")
         throw(ArgumentError("transr = $transr should be :N or :(T <: Complex ? :C : :T)"))
     end
     rfdims = _parentsize(n, tr ≠ 'N')
@@ -45,7 +45,7 @@ function Base.setindex!(A::TriangularRFP{T}, x::T, i::Integer, j::Integer) where
         if iszero(x)
             return x
         else
-            throw(error("Attempt to assign a non-zero value to a systematic zero"))
+            throw(BoundsError("Attempt to assign a non-zero value to a systematic zero"))
         end
     end
     rs, doconj = _packedinds(A, Int(i), Int(j), iseven(n), l)

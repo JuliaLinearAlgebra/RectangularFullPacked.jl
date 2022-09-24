@@ -20,5 +20,3 @@ LinearAlgebra.inv!(A::CholeskyRFP) =
     HermitianRFP(LAPACK_RFP.pftri!(A.transr, A.uplo, A.data), A.transr, A.uplo)
 LinearAlgebra.inv(A::CholeskyRFP) = LinearAlgebra.inv!(copy(A))
 LinearAlgebra.inv(A::HermitianRFP) = LinearAlgebra.inv!(cholesky(A))
-
-LinearAlgebra.parent(A::CholeskyRFP) = A.data

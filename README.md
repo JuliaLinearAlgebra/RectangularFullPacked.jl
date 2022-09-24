@@ -7,7 +7,7 @@ A Julia package for the Rectangular Full Packed (RFP) matrix storage format.
 
 The RFP format stores a triangular or Symmetric/Hermitian matrix of size `n` in `(n * (n + 1))/2` storage locations consisting of three blocks from the original matrix.
 The exact sizes and orientations of the blocks in the underlying `parent` array depend on whether the lower or upper triangle is stored and whether the parent array is transposed.
-It also depends on whether the size of the matrix is even or odd as shown Fig. 5 (p. 12) of [LAPACK Working Notes 199](https://netlib.org/lapack/lawnspdf/lawn199.pdf).
+It also depends on whether the size of the matrix is even or odd as shown in Fig. 5 (p. 12) of [LAPACK Working Notes 199](https://netlib.org/lapack/lawnspdf/lawn199.pdf).
 
 For example, starting with a 6 by 6 matrix whose elements are numbered 1 to 36 in column-major order
 ```julia
@@ -47,7 +47,7 @@ julia> AL = tril!(collect(A))
  ```
  provides the same displayed form but the underlying, "parent" array is 7 by 3
  ```
- julia> ALparent = Int.(parent(ArfpL))
+ julia> ALparent = Int.(ArfpL.data)
 7×3 Matrix{Int64}:
  22  23  24
   1  29  30
@@ -72,7 +72,7 @@ julia> AL = tril!(collect(reshape(1:25, 5, 5)))
  4   9  14  19   0
  5  10  15  20  25
 
-julia> ArfpL = Int.(parent(TriangularRFP(float(AL), :L)))
+julia> ArfpL = Int.(TriangularRFP(float(AL), :L).data)
 5×3 Matrix{Int64}:
  1  19  20
  2   7  25
@@ -105,7 +105,7 @@ julia> ArfpL = HermitianRFP(TriangularRFP(float.(A), :L))
  1.0  2.0  0.0
  1.0  0.0  2.0
 
- julia> parent(cholesky!(ArfpL))
+ julia> cholesky!(ArfpL).data
 3×2 Matrix{Float64}:
  1.41421    1.1547
  0.707107   1.22474

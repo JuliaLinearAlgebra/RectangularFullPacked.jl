@@ -34,9 +34,26 @@ import RectangularFullPacked: Ac_mul_A_RFP, TriangularRFP
             @test_throws BoundsError Atr_RFP[n + 1, 1]
             @test_throws BoundsError Atr_RFP[1, n + 1]
 
+            Ann = Atr_RFP[n, n] 
+            Atr_RFP[n, n] = 1.0
+            @test isone(Atr_RFP[n, n])
+            Atr_RFP[n, n] = Ann
+            if uplo == :U
+                Atr_RFP[n, 1] = 0.0   # can assign 0.0 in lower triangle
+                @test_throws BoundsError Atr_RFP[n, 1] = 1.0 # but not a non-zero
+            else
+                Atr_RFP[1, n] = 0.0   # can assign 0.0 in upper triangle
+                @test_throws BoundsError Atr_RFP[1, n] = 1.0 # but not a non-zero
+            end
             # @test Atr_RFP[2, 1] == Atr_RFP[1, 2]
             # @test Atr_RFP[end-2, end-1] == Atr_RFP[end-1, end-2]
         end
+    end
+
+    @testset "Errors in constructing Triangular_RFP" begin
+        A = triu(rand(6, 6))
+        @test_throws ArgumentError TriangularRFP(A, :W; transr=:N) 
+        @test_throws ArgumentError TriangularRFP(A, :U; transr=:W) 
     end
 
     @testset "Hermitian with element type: $elty. Problem size: $n, uplo: $uplo" for elty in (
