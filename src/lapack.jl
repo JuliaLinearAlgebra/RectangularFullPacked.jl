@@ -77,7 +77,7 @@ for (f, elty) in (
 )
 
     @eval begin
-        function pftrf!(transr::Char, uplo::Char, A::StridedVecOrMat{$elty})
+        function pftrf!(transr::Char, uplo::Char, A::VecOrMat{$elty})
             chkuplo(uplo)
             n = round(Int, div(sqrt(8length(A)), 2))
             info = Ref{BlasInt}()
