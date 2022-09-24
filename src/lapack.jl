@@ -139,7 +139,7 @@ for (f, elty) in (
         function pftrs!(
             transr::Char,
             uplo::Char,
-            A::StridedVecOrMat{$elty},
+            A::VecOrMat{$elty},
             B::StridedVecOrMat{$elty},
         )
             chkuplo(uplo)
