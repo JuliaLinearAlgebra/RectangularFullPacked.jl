@@ -6,8 +6,10 @@ end
 
 function TriangularRFP(A::Matrix{T}, uplo::Symbol = :U; transr::Symbol=:N) where {T}
     n = checksquare(A)
-    (ul = first(string(uplo))) ∈ "UL" ||
+    ul = first(string(uplo))
+    ul ∉ "UL"
         throw(ArgumentError("uplo = $uplo should be :U or :L"))
+    end
     tr = first(string(transr))
     tr ∉ (T <: Complex ? "NC" : "NT")
         throw(ArgumentError("transr = $transr should be :N or :(T <: Complex ? :C : :T)"))
