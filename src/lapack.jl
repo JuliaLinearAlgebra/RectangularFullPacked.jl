@@ -26,7 +26,7 @@ for (f, elty, relty) in (
             alpha::Real,
             A::StridedMatrix{$elty},
             beta::Real,
-            C::StridedVecOrMat{$elty},
+            C::VecOrMat{$elty},
         )
             chkuplo(uplo)
             chkstride1(A)
