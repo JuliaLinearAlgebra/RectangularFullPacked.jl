@@ -299,7 +299,7 @@ for (f, elty) in (
 )
 
     @eval begin
-        function tfttr!(A::StridedMatrix{$elty}, transr::Char, uplo::Char, Arf::StridedVecOrMat{$elty})
+        function tfttr!(A::StridedMatrix{$elty}, transr::Char, uplo::Char, Arf::VecOrMat{$elty})
             chkuplo(uplo)
             info = Ref{BlasInt}()
             chkstride1(A)
