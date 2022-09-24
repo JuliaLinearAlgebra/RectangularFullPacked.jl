@@ -344,7 +344,7 @@ for (f, elty) in (
 )
 
     @eval begin
-        function trttf!(Arf::StridedVecOrMat{$elty}, transr::Char, uplo::Char, A::StridedMatrix{$elty})
+        function trttf!(Arf::VecOrMat{$elty}, transr::Char, uplo::Char, A::StridedMatrix{$elty})
             chkuplo(uplo)
             chkstride1(A)
             n = size(A, 1)
