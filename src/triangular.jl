@@ -8,8 +8,10 @@ function TriangularRFP(A::Matrix{T}, uplo::Symbol = :U; transr::Symbol=:N) where
     n = checksquare(A)
     (ul = first(string(uplo))) ∈ "UL" ||
         throw(ArgumentError("uplo = $uplo should be :U or :L"))
-    (tr = first(string(transr))) ∈ (T <: Complex ? "NC" : "NT") ||
+    tr = first(string(transr))
+    tr ∉ (T <: Complex ? "NC" : "NT")
         throw(ArgumentError("transr = $transr should be :N or :(T <: Complex ? :C : :T)"))
+    end
     rfdims = _parentsize(n, tr ≠ 'N')
     return TriangularRFP(
         LAPACK_RFP.trttf!(similar(A, first(rfdims), last(rfdims)), tr, ul, A),
