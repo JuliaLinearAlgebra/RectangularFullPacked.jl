@@ -258,7 +258,7 @@ for (f, elty) in (
 )
 
     @eval begin
-        function tftri!(transr::Char, uplo::Char, diag::Char, A::StridedMatrix{$elty})
+        function tftri!(transr::Char, uplo::Char, diag::Char, A::Matrix{$elty})
             chkuplo(uplo)
             chkdiag(diag)
             chkstride1(A)
