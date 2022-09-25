@@ -1,9 +1,9 @@
 using Test, LinearAlgebra
 import RectangularFullPacked: Ac_mul_A_RFP, TriangularRFP
 
-@testset "Rectuangular Full Pack Format" begin
+@testset "Rectangular Full Pack Format" begin
 
-    @testset "Core generic functionality" for n in (6, 7), uplo in (:U, :L)
+    @testset "Core generic functionality: n = $n, uplo = $uplo, transr = $transr" for n in (6, 7), uplo in (:U, :L), transr in (:N, :T)
 
         A = rand(10, n)
 
@@ -23,57 +23,76 @@ import RectangularFullPacked: Ac_mul_A_RFP, TriangularRFP
         end
 
         @testset "Triangular" begin
-            Atr_RFP = TriangularRFP(triu(A'A), uplo)
+            Atr_RFP = TriangularRFP(triu(A'A), uplo; transr)
             @test size(Atr_RFP, 1) == n
             @test size(Atr_RFP, 2) == n
             @test size(Atr_RFP, 3) == 1
 
             # Indexing not implemented yet for Atr_RFP
-            # @test_throws BoundsError Atr_RFP[0, 1]
-            # @test_throws BoundsError Atr_RFP[1, 0]
-            # @test_throws BoundsError Atr_RFP[n + 1, 1]
-            # @test_throws BoundsError Atr_RFP[1, n + 1]
+            @test_throws BoundsError Atr_RFP[0, 1]
+            @test_throws BoundsError Atr_RFP[1, 0]
+            @test_throws BoundsError Atr_RFP[n + 1, 1]
+            @test_throws BoundsError Atr_RFP[1, n + 1]
 
-            @test_broken Atr_RFP[2, 1] == Atr_RFP[1, 2]
-            @test_broken Atr_RFP[end-2, end-1] == Atr_RFP[end-1, end-2]
+            Ann = Atr_RFP[n, n] 
+            Atr_RFP[n, n] = 1.0
+            @test isone(Atr_RFP[n, n])
+            Atr_RFP[n, n] = Ann
+            if uplo == :U
+                Atr_RFP[n, 1] = 0.0   # can assign 0.0 in lower triangle
+                @test_throws BoundsError Atr_RFP[n, 1] = 1.0 # but not a non-zero
+            else
+                Atr_RFP[1, n] = 0.0   # can assign 0.0 in upper triangle
+                @test_throws BoundsError Atr_RFP[1, n] = 1.0 # but not a non-zero
+            end
+            # @test Atr_RFP[2, 1] == Atr_RFP[1, 2]
+            # @test Atr_RFP[end-2, end-1] == Atr_RFP[end-1, end-2]
         end
     end
 
-    @testset "Hermitian with element type: $elty. Problem size: $n" for elty in (
+    @testset "Errors in constructing Triangular_RFP" begin
+        A = triu(rand(6, 6))
+        @test_throws ArgumentError TriangularRFP(A, :W; transr=:N) 
+        @test_throws ArgumentError TriangularRFP(A, :U; transr=:W) 
+    end
+
+    @testset "Hermitian with element type: $elty. Problem size: $n, uplo: $uplo" for elty in (
             Float32,
             Float64,
             Complex{Float32},
             Complex{Float64},
         ),
         n in (6, 7),
-        uplo in (:L, :U)
+        uplo in (:L, :U),
+        transr in (:N, elty <: Complex ? :C : :T)
 
         A = rand(elty, 10, n)
         AcA = A'A
         AcA_RFP = Ac_mul_A_RFP(A, uplo)
         o = ones(elty, n)
 
-        @test AcA ≈ A'A
+        @test AcA ≈ AcA_RFP
         @test AcA \ o ≈ AcA_RFP \ o
         @test inv(AcA) ≈ inv(AcA_RFP)
         @test inv(cholesky(AcA)) ≈ inv(factorize(AcA_RFP))
     end
 
-    @testset "Hermitian with element type: $elty. Problem size: $n" for elty in (
+    @testset "Triangular with element type: $elty. Problem size: $n, uplo: $uplo, transr: $transr" for elty in (
             Float32,
             Float64,
             Complex{Float32},
             Complex{Float64},
         ),
         n in (6, 7),
-        uplo in (:L, :U)
+        uplo in (:L, :U),
+        transr in (:N, elty <: Complex ? :C : :T)
 
         A = lu(rand(elty, n, n)).U
         A = uplo == :U ? A : copy(A')
-        A_RFP = TriangularRFP(A, uplo)
+        A_RFP = TriangularRFP(A, uplo; transr)
         o = ones(elty, n)
 
-        @test_broken A ≈ A_RFP
+        @test A ≈ A_RFP
         @test A ≈ Array(A_RFP)
         @test A \ o ≈ A_RFP \ o
         @test inv(A) ≈ Array(inv(A_RFP))

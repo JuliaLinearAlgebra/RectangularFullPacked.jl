@@ -2,7 +2,7 @@ module LAPACK_RFP
 
 using libblastrampoline_jll
 using LinearAlgebra
-using LinearAlgebra: BlasInt, chkstride1, LAPACKException
+using LinearAlgebra: BlasInt, checksquare, chkstride1, LAPACKException
 using LinearAlgebra.BLAS: @blasfunc
 using LinearAlgebra.LAPACK: chkdiag, chkside, chkuplo
 
@@ -26,7 +26,7 @@ for (f, elty, relty) in (
             alpha::Real,
             A::StridedMatrix{$elty},
             beta::Real,
-            C::StridedVector{$elty},
+            C::VecOrMat{$elty},
         )
             chkuplo(uplo)
             chkstride1(A)
@@ -77,7 +77,7 @@ for (f, elty) in (
 )
 
     @eval begin
-        function pftrf!(transr::Char, uplo::Char, A::StridedVector{$elty})
+        function pftrf!(transr::Char, uplo::Char, A::VecOrMat{$elty})
             chkuplo(uplo)
             n = round(Int, div(sqrt(8length(A)), 2))
             info = Ref{BlasInt}()
@@ -106,7 +106,7 @@ for (f, elty) in (
 )
 
     @eval begin
-        function pftri!(transr::Char, uplo::Char, A::StridedVector{$elty})
+        function pftri!(transr::Char, uplo::Char, A::VecOrMat{$elty})
             chkuplo(uplo)
             n = round(Int, div(sqrt(8length(A)), 2))
             info = Ref{BlasInt}()
@@ -139,7 +139,7 @@ for (f, elty) in (
         function pftrs!(
             transr::Char,
             uplo::Char,
-            A::StridedVector{$elty},
+            A::VecOrMat{$elty},
             B::StridedVecOrMat{$elty},
         )
             chkuplo(uplo)
@@ -196,18 +196,20 @@ for (f, elty) in (
             trans::Char,
             diag::Char,
             alpha::$elty,
-            A::StridedVector{$elty},
+            A::Matrix{$elty},
             B::StridedVecOrMat{$elty},
         )
             chkuplo(uplo)
             chkside(side)
             chkdiag(diag)
+            chkstride1(A)
             chkstride1(B)
             m, n = size(B, 1), size(B, 2)
-            if round(Int, div(sqrt(8length(A)), 2)) != m
+            k, l = transr == 'N' ? size(A) : reverse(size(A))
+            if k - (2l ≤ k) != m
                 throw(
                     DimensionMismatch(
-                        "First dimension of B must equal $(round(Int, div(sqrt(8length(A)), 2))), got $m",
+                        "First dimension of B must equal $(k - (2l ≤ k)), got $m",
                     ),
                 )
             end
@@ -256,10 +258,12 @@ for (f, elty) in (
 )
 
     @eval begin
-        function tftri!(transr::Char, uplo::Char, diag::Char, A::StridedVector{$elty})
+        function tftri!(transr::Char, uplo::Char, diag::Char, A::Matrix{$elty})
             chkuplo(uplo)
             chkdiag(diag)
-            n = round(Int, div(sqrt(8length(A)), 2))
+            chkstride1(A)
+            k, l = transr == 'N' ? size(A) : reverse(size(A))
+            n = k - (2l ≤ k)
             info = Ref{BlasInt}()
 
             ccall(
@@ -295,11 +299,23 @@ for (f, elty) in (
 )
 
     @eval begin
-        function tfttr!(transr::Char, uplo::Char, Arf::StridedVector{$elty})
+        function tfttr!(
+            A::StridedMatrix{$elty},
+            transr::Char,
+            uplo::Char,
+            Arf::VecOrMat{$elty},
+        )
             chkuplo(uplo)
-            n = round(Int, div(sqrt(8length(Arf)), 2))
             info = Ref{BlasInt}()
-            A = similar(Arf, $elty, n, n)
+            chkstride1(A)
+            n = checksquare(A)
+            trgt = (n * (n + 1)) >> 1
+            length(Arf) == trgt || throw(
+                DimensionMismatch(
+                    "RFP storage for ($m, $n) array is $(length(Arf)) ≠ $trgt",
+                ),
+            )
+            lda = max(1, stride(A, 2))
 
             ccall(
                 (@blasfunc($f), liblapack_name),
@@ -318,7 +334,7 @@ for (f, elty) in (
                 n,
                 Arf,
                 A,
-                n,
+                lda,
                 info,
             )
 
@@ -336,13 +352,20 @@ for (f, elty) in (
 )
 
     @eval begin
-        function trttf!(transr::Char, uplo::Char, A::StridedMatrix{$elty})
+        function trttf!(
+            Arf::VecOrMat{$elty},
+            transr::Char,
+            uplo::Char,
+            A::StridedMatrix{$elty},
+        )
             chkuplo(uplo)
             chkstride1(A)
             n = size(A, 1)
             lda = max(1, stride(A, 2))
             info = Ref{BlasInt}()
-            Arf = similar(A, $elty, div(n * (n + 1), 2))
+            Arflen = (n * (n + 1)) >> 1
+            length(Arf) == Arflen ||
+                throw(DimensionMismatch("length(Arf) = $(length(Arf)), should be $Arflen"))
 
             ccall(
                 (@blasfunc($f), liblapack_name),
