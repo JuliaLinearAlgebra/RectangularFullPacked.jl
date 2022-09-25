@@ -10,7 +10,7 @@ end
 Returns an index tuple into `A.data` where `ij` is in the correct index range and correct triangle
 
 The triangle is checked before entry to this function because `ij` not being in the `A.uplo` triangle
-is handled differently for triangular, which returns `zero(T)` and Hermitian, which returns the
+is handled differently for triangular, which returns `zero(T)`, and Hermitian, which returns the
 conjugate of `A[j, i]`.
 
 `l`, the smaller dimension of the parent array, and `neven`, whether the virtual
@@ -34,7 +34,7 @@ end
 """
     _parentsize(n::Integer)
 
-Returns the size of the `data` field in an RFP array with `transr == 'N'`, representing a matrix of size `n`
+Returns the size of the `data` field in an RFP array, representing a matrix of size `n`. `tr` is the value of `A.transr ≠ 'N'`.
 """
 function _parentsize(n::Integer, tr::Bool = false)
     n > 0 || throw(ArgumentError("n = $n must be positive"))
