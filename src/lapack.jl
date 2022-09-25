@@ -196,7 +196,7 @@ for (f, elty) in (
             trans::Char,
             diag::Char,
             alpha::$elty,
-            A::StridedMatrix{$elty},
+            A::Matrix{$elty},
             B::StridedVecOrMat{$elty},
         )
             chkuplo(uplo)
