@@ -23,7 +23,7 @@ julia> A = reshape(1:36, (6, 6))
  6  12  18  24  30  36
 ```
 the lower triangular matrix `AL` is constructed by replacing the elements above the diagonal with zero.
-```
+```julia
 julia> AL = tril!(collect(A))
 6×6 Matrix{Int64}:
  1   0   0   0   0   0
@@ -35,7 +35,7 @@ julia> AL = tril!(collect(A))
  ```
  `AL` requires the same amount of storage as does `A` even though there are only 21 potential non-zeros in `AL`.
  The RFP version of the lower triangular matrix
- ```
+ ```julia
  julia> ArfpL = Int.(TriangularRFP(float.(A), :L))
 6×6 Matrix{Int64}:
  1   0   0   0   0   0
@@ -46,7 +46,7 @@ julia> AL = tril!(collect(A))
  6  12  18  24  30  36
  ```
  provides the same displayed form but the underlying, "parent" array is 7 by 3
- ```
+ ```julia
  julia> ALparent = Int.(ArfpL.data)
 7×3 Matrix{Int64}:
  22  23  24
