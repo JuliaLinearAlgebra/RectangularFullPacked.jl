@@ -9,6 +9,16 @@ end
 
 #HermitianRFP(A::TriangularRFP) = HermitianRFP(A.data, A.transr, A.uplo)
 
+function LinearAlgebra.Hermitian(A::TriangularRFP{<:LinearAlgebra.BlasReal}, uplo::Symbol)
+    Symbol(A.uplo) == uplo ||
+        throw(ArgumentError("A.uplo = $(A.uplo) conflicts with argument uplo = $uplo"))
+    return Hermitian(A)
+end
+
+function LinearAlgebra.Hermitian(A::TriangularRFP{<:LinearAlgebra.BlasReal})
+    return HermitianRFP(A.data, A.transr, A.uplo)
+end
+
 Base.copy(A::HermitianRFP{T}) where {T} = HermitianRFP{T}(copy(A.data), A.transr, A.uplo)
 
 function Base.getindex(A::HermitianRFP, i::Integer, j::Integer)
