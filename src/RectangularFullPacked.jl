@@ -6,6 +6,7 @@ using LinearAlgebra
 using LinearAlgebra: BlasFloat, checksquare
 
 import Base: \
+import LinearAlgebra.BLAS: syrk!
 
 abstract type AbstractRFP{T} <: AbstractMatrix{T} end
 
