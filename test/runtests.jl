@@ -69,6 +69,7 @@ import RectangularFullPacked: Ac_mul_A_RFP, TriangularRFP
         A = rand(elty, 10, n)
         AcA = A'A
         AcA_RFP = Ac_mul_A_RFP(A, uplo)
+        @test AcA_RFP ≈ BLAS.syrk!(elty <: Complex ? 'C' : 'T', 1.0, A, 0.0, copy(AcA_RFP))
         o = ones(elty, n)
 
         @test AcA ≈ AcA_RFP
@@ -96,5 +97,12 @@ import RectangularFullPacked: Ac_mul_A_RFP, TriangularRFP
         @test A ≈ Array(A_RFP)
         @test A \ o ≈ A_RFP \ o
         @test inv(A) ≈ Array(inv(A_RFP))
+    end
+
+    @testset "In-place scalar multiplication" begin
+        U = lu(rand(7, 7)).U
+        B = sqrt(π)
+        @test rmul!(copy(U), B) ≈ rmul!(TriangularRFP(U, :U), B)
+        @test lmul!(B, copy(U)) ≈ lmul!(B, TriangularRFP(U, :U; transr=:T))
     end
 end

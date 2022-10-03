@@ -9,6 +9,8 @@ end
 
 #HermitianRFP(A::TriangularRFP) = HermitianRFP(A.data, A.transr, A.uplo)
 
+Base.copy(A::HermitianRFP{T}) where {T} = HermitianRFP{T}(copy(A.data), A.transr, A.uplo)
+
 function Base.getindex(A::HermitianRFP, i::Integer, j::Integer)
     (A.uplo == 'L' ? i < j : i > j) && return conj(getindex(A, j, i))
     n, k, l = checkbounds(A, i, j)
@@ -28,4 +30,16 @@ function Ac_mul_A_RFP(A::Matrix{T}, uplo = :U) where {T<:BlasFloat}
     return HermitianRFP(LAPACK_RFP.sfrk!('N', ul, tr, 1.0, A, 0.0, par), 'N', ul)
 end
 
-Base.copy(A::HermitianRFP) = HermitianRFP(copy(A.data), A.transr, A.uplo)
+function BLAS.syrk!(
+    trans::AbstractChar,
+    α::Real,
+    A::StridedMatrix{T},
+    β::Real,
+    C::HermitianRFP{T},
+) where {T}
+    return HermitianRFP(
+        LAPACK_RFP.sfrk!(C.transr, C.uplo, Char(trans), α, A, β, C.data),
+        C.transr,
+        C.uplo,
+    )
+end
