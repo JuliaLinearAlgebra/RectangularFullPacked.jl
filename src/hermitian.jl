@@ -9,13 +9,13 @@ end
 
 #HermitianRFP(A::TriangularRFP) = HermitianRFP(A.data, A.transr, A.uplo)
 
-function LinearAlgebra.Hermitian(A::TriangularRFP{<:LinearAlgebra.BlasReal}, uplo::Symbol)
+function Hermitian(A::TriangularRFP{<:LinearAlgebra.BlasReal}, uplo::Symbol)
     Symbol(A.uplo) == uplo ||
         throw(ArgumentError("A.uplo = $(A.uplo) conflicts with argument uplo = $uplo"))
     return Hermitian(A)
 end
 
-function LinearAlgebra.Hermitian(A::TriangularRFP{<:LinearAlgebra.BlasReal})
+function Hermitian(A::TriangularRFP{<:LinearAlgebra.BlasReal})
     return HermitianRFP(A.data, A.transr, A.uplo)
 end
 
@@ -40,7 +40,7 @@ function Ac_mul_A_RFP(A::Matrix{T}, uplo = :U) where {T<:BlasFloat}
     return HermitianRFP(LAPACK_RFP.sfrk!('N', ul, tr, 1.0, A, 0.0, par), 'N', ul)
 end
 
-function BLAS.syrk!(
+function syrk!(
     trans::AbstractChar,
     α::Real,
     A::StridedMatrix{T},
