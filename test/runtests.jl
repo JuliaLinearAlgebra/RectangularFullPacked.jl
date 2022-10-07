@@ -105,4 +105,11 @@ import RectangularFullPacked: Ac_mul_A_RFP, TriangularRFP
         @test rmul!(copy(U), B) ≈ rmul!(TriangularRFP(U, :U), B)
         @test lmul!(B, copy(U)) ≈ lmul!(B, TriangularRFP(U, :U; transr=:T))
     end
+
+    @testset "Hermitian from Triangular" begin
+        U = lu(rand(7,7)).U
+        @test Hermitian(TriangularRFP(U, :U)) ≈ Hermitian(U, :U)
+        @test Hermitian(TriangularRFP(U, :U), :U) ≈ Hermitian(U, :U)
+        @test_throws ArgumentError Hermitian(TriangularRFP(U, :U), :L)
+    end
 end
