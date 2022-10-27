@@ -1,6 +1,6 @@
 name = "RectangularFullPacked"
 uuid = "27983f2f-6524-42ba-a408-2b5a31c238e4"
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
