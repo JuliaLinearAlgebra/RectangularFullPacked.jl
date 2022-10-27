@@ -4,8 +4,13 @@ struct CholeskyRFP{T<:BlasFloat} <: Factorization{T}
     uplo::Char
 end
 
-LinearAlgebra.cholesky!(A::HermitianRFP{T}) where {T<:BlasFloat} =
-    CholeskyRFP(LAPACK_RFP.pftrf!(A.transr, A.uplo, A.data), A.transr, A.uplo)
+function LinearAlgebra.cholesky!(A::HermitianRFP{T}) where {T<:BlasFloat}
+    return CholeskyRFP(
+        LAPACK_RFP.pftrf!(A.transr, A.uplo, A.data),
+        A.transr,
+        A.uplo,
+    )
+end
 LinearAlgebra.cholesky(A::HermitianRFP{T}) where {T<:BlasFloat} = cholesky!(copy(A))
 LinearAlgebra.factorize(A::HermitianRFP) = cholesky(A)
 

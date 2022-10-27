@@ -23,7 +23,7 @@ end
 function _packedinds(i::Int, j::Int, lower::Bool, neven::Bool, tr::Bool, l::Int)
     if lower
         conj = l < j
-        inds = conj ?  (j - l, i + !neven - l) : (i + neven, j)
+        inds = conj ? (j - l, i + !neven - l) : (i + neven, j)
     else
         conj = (j + !neven) ≤ l
         inds = conj ? (l + neven + j, i) : (i, j + !neven - l)
@@ -55,7 +55,8 @@ function _rfpsize(A::AbstractRFP)
     dsz = size(A.data)
     k, l = A.transr == 'N' ? dsz : reverse(dsz)
     L = 2l
-    isone(abs(k - L)) || throw(ArgumentError("size(A.data) = $dsz is not consistent with RFP"))
+    isone(abs(k - L)) ||
+        throw(ArgumentError("size(A.data) = $dsz is not consistent with RFP"))
     return k - (L < k), k, l
 end
 
@@ -72,4 +73,14 @@ end
 function Base.size(A::AbstractRFP)
     n, k, l = _rfpsize(A)
     return (n, n)
+end
+
+function LinearAlgebra.rmul!(A::AbstractRFP, B::Number)
+    rmul!(A.data, B)
+    return A
+end
+
+function LinearAlgebra.lmul!(A::Number, B::AbstractRFP)
+    lmul!(A, B.data)
+    return B
 end

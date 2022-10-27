@@ -4,7 +4,7 @@ struct TriangularRFP{T<:BlasFloat} <: AbstractRFP{T}
     uplo::Char
 end
 
-function TriangularRFP(A::Matrix{T}, uplo::Symbol = :U; transr::Symbol=:N) where {T}
+function TriangularRFP(A::Matrix{T}, uplo::Symbol = :U; transr::Symbol = :N) where {T}
     n = checksquare(A)
     ul = first(string(uplo))
     if ul ∉ "UL"
@@ -21,7 +21,7 @@ function TriangularRFP(A::Matrix{T}, uplo::Symbol = :U; transr::Symbol=:N) where
         ul,
     )
 end
-    
+
 function Base.Array(A::TriangularRFP{T}) where {T}
     n, k, l = _rfpsize(A)
     C = Array{T}(undef, (n, n))
@@ -36,7 +36,7 @@ function Base.getindex(A::TriangularRFP{T}, i::Integer, j::Integer) where {T}
     (A.uplo == 'L' ? i < j : i > j) && return zero(T)
     rs, doconj = _packedinds(A, Int(i), Int(j), iseven(n), l)
     val = A.data[first(rs), last(rs)]
-    return doconj ?  conj(val) : val
+    return doconj ? conj(val) : val
 end
 
 function Base.setindex!(A::TriangularRFP{T}, x::T, i::Integer, j::Integer) where {T}
