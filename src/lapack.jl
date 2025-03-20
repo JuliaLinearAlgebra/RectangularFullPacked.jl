@@ -206,7 +206,7 @@ for (f, elty) in (
             chkstride1(B)
             m, n = size(B, 1), size(B, 2)
             k, l = transr == 'N' ? size(A) : reverse(size(A))
-            if k - (2l ≤ k) != m
+            if k - (2l ≤ k) != (side == 'L' ? m : n)
                 throw(
                     DimensionMismatch(
                         "First dimension of B must equal $(k - (2l ≤ k)), got $m",
