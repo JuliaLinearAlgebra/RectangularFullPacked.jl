@@ -89,14 +89,17 @@ import RectangularFullPacked: Ac_mul_A_RFP, TriangularRFP
         transr in (:N, elty <: Complex ? :C : :T)
 
         A = lu(rand(elty, n, n)).U
-        A = uplo == :U ? A : copy(A')
+        A = uplo == 'U' ? A : copy(A')
         A_RFP = TriangularRFP(A, uplo; transr)
+        Atri = uplo == :U ? UpperTriangular(copy(A)) : LowerTriangular(A)
         o = ones(elty, n)
 
         @test A ≈ A_RFP
         @test A ≈ Array(A_RFP)
         @test A \ o ≈ A_RFP \ o
         @test inv(A) ≈ Array(inv(A_RFP))
+        @test ldiv!(Atri, copy(o)) ≈ ldiv!(A_RFP, copy(o))
+        @test rdiv!(collect(o'), Atri) ≈ rdiv!(collect(o'), A_RFP)
     end
 
     @testset "In-place scalar multiplication" begin
