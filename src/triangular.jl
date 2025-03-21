@@ -56,6 +56,24 @@ LinearAlgebra.inv!(A::TriangularRFP) =
     TriangularRFP(LAPACK_RFP.tftri!(A.transr, A.uplo, 'N', A.data), A.transr, A.uplo)
 LinearAlgebra.inv(A::TriangularRFP) = LinearAlgebra.inv!(copy(A))
 
-ldiv!(A::TriangularRFP{T}, B::StridedVecOrMat{T}) where {T} =
+LinearAlgebra.ldiv!(A::TriangularRFP{T}, B::StridedVecOrMat{T}) where {T} =
     LAPACK_RFP.tfsm!(A.transr, 'L', A.uplo, 'N', 'N', one(T), A.data, B)
+function LinearAlgebra.ldiv!(
+    A::Adjoint{T, TriangularRFP{T}},
+    B::StridedVecOrMat{T}) where {T}
+    Ap = A.parent
+    tr = T <: Complex ? 'C' : 'T'
+    return LAPACK_RFP.tfsm!(Ap.transr, 'L', Ap.uplo, tr, 'N', one(T), Ap.data, B)
+end
+
+LinearAlgebra.rdiv!(A::StridedVecOrMat{T}, B::TriangularRFP{T}) where {T} =
+    LAPACK_RFP.tfsm!(B.transr, 'R', B.uplo, 'N', 'N', one(T), B.data, A)
+function LinearAlgebra.rdiv!(
+    A::StridedVecOrMat{T},
+    B::Adjoint{T, TriangularRFP{T}}) where {T}
+    Bp = B.parent
+    tr = T <: Complex ? 'C' : 'T'
+    return LAPACK_RFP.tfsm!(Bp.transr, 'R', Bp.uplo, tr, 'N', one(T), Bp.data, A)
+end
+
 (\)(A::TriangularRFP, B::StridedVecOrMat) = ldiv!(A, copy(B))
