@@ -99,7 +99,9 @@ import RectangularFullPacked: Ac_mul_A_RFP, TriangularRFP
         @test A \ o ≈ A_RFP \ o
         @test Array(inv(A)) ≈ Array(inv(A_RFP))
         @test ldiv!(Atri, copy(o)) ≈ ldiv!(A_RFP, copy(o))
+        @test ldiv!(Atri', copy(o)) ≈ ldiv!(A_RFP', copy(o))
         @test rdiv!(collect(o'), Atri) ≈ rdiv!(collect(o'), A_RFP)
+        @test rdiv!(collect(o'), Atri') ≈ rdiv!(collect(o'), A_RFP')
     end
 
     @testset "In-place scalar multiplication" begin

@@ -62,7 +62,8 @@ function LinearAlgebra.ldiv!(
     A::Adjoint{T, TriangularRFP{T}},
     B::StridedVecOrMat{T}) where {T}
     Ap = A.parent
-    return LAPACK_RFP.tfsm!(Ap.transr, 'L', Ap.uplo, 'T', 'N', one(T), Ap.data, B)
+    tr = T <: Complex ? 'C' : 'T'
+    return LAPACK_RFP.tfsm!(Ap.transr, 'L', Ap.uplo, tr, 'N', one(T), Ap.data, B)
 end
 
 LinearAlgebra.rdiv!(A::StridedVecOrMat{T}, B::TriangularRFP{T}) where {T} =
@@ -71,7 +72,8 @@ function LinearAlgebra.rdiv!(
     A::StridedVecOrMat{T},
     B::Adjoint{T, TriangularRFP{T}}) where {T}
     Bp = B.parent
-    return LAPACK_RFP.tfsm!(Bp.transr, 'R', Bp.uplo, 'T', 'N', one(T), Bp.data, A)
+    tr = T <: Complex ? 'C' : 'T'
+    return LAPACK_RFP.tfsm!(Bp.transr, 'R', Bp.uplo, tr, 'N', one(T), Bp.data, A)
 end
 
 (\)(A::TriangularRFP, B::StridedVecOrMat) = ldiv!(A, copy(B))
