@@ -108,7 +108,7 @@ L factor:
  0.707107   1.22474    ⋅ 
  0.707107  -0.408248  1.1547
 
-julia> ArfpL = HermitianRFP(TriangularRFP(float.(A), :L))
+julia> ArfpL = Hermitian(TriangularRFP(float.(A), :L))
 3×3 HermitianRFP{Float64}:
  2.0  1.0  1.0
  1.0  2.0  0.0
