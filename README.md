@@ -36,7 +36,16 @@ julia> AL = tril!(collect(A))
  `AL` requires the same amount of storage as does `A` even though there are only 21 potential non-zeros in `AL`.
  The RFP version of the lower triangular matrix
  ```julia
- julia> ArfpL = Int.(TriangularRFP(float.(A), :L))
+ julia> ArfpL = TriangularRFP(float.(A), :L)
+6×6 TriangularRFP{Float64}:
+ 1.0   0.0   0.0   0.0   0.0   0.0
+ 2.0   8.0   0.0   0.0   0.0   0.0
+ 3.0   9.0  15.0   0.0   0.0   0.0
+ 4.0  10.0  16.0  22.0   0.0   0.0
+ 5.0  11.0  17.0  23.0  29.0   0.0
+ 6.0  12.0  18.0  24.0  30.0  36.0
+
+julia> Int.(ArfpL)
 6×6 Matrix{Int64}:
  1   0   0   0   0   0
  2   8   0   0   0   0
