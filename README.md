@@ -36,7 +36,7 @@ julia> AL = tril!(collect(A))
 `AL` requires the same amount of storage as does `A` even though there are only 21 potential non-zeros in `AL`.
  The RFP version of the lower triangular matrix
 ```julia
-julia> ArfpL = TriangularRFP(float.(A), :L)
+julia> ArfpL = TriangularRFP(A, :L)
 6×6 TriangularRFP{Float64}:
  1.0   0.0   0.0   0.0   0.0   0.0
  2.0   8.0   0.0   0.0   0.0   0.0
@@ -72,7 +72,7 @@ julia> AL = tril!(collect(reshape(1.:25., 5, 5)))
  4.0   9.0  14.0  19.0   0.0
  5.0  10.0  15.0  20.0  25.0
 
-julia> ArfpL = TriangularRFP(float(AL), :L).data
+julia> ArfpL = TriangularRFP(AL, :L).data
 5×3 Matrix{Float64}:
  1.0  19.0  20.0
  2.0   7.0  25.0
@@ -99,7 +99,7 @@ L factor:
  0.707107   1.22474    ⋅ 
  0.707107  -0.408248  1.1547
 
-julia> ArfpL = Hermitian(TriangularRFP(float.(A), :L))
+julia> ArfpL = Hermitian(TriangularRFP(A, :L))
 3×3 HermitianRFP{Float64}:
  2.0  1.0  1.0
  1.0  2.0  0.0
