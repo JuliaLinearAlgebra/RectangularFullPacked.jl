@@ -32,11 +32,11 @@ julia> AL = tril!(collect(A))
  4.0  10.0  16.0  22.0   0.0   0.0
  5.0  11.0  17.0  23.0  29.0   0.0
  6.0  12.0  18.0  24.0  30.0  36.0
- ```
- `AL` requires the same amount of storage as does `A` even though there are only 21 potential non-zeros in `AL`.
+```
+`AL` requires the same amount of storage as does `A` even though there are only 21 potential non-zeros in `AL`.
  The RFP version of the lower triangular matrix
- ```julia
- julia> ArfpL = TriangularRFP(float.(A), :L)
+```julia
+julia> ArfpL = TriangularRFP(float.(A), :L)
 6×6 TriangularRFP{Float64}:
  1.0   0.0   0.0   0.0   0.0   0.0
  2.0   8.0   0.0   0.0   0.0   0.0
@@ -45,9 +45,9 @@ julia> AL = tril!(collect(A))
  5.0  11.0  17.0  23.0  29.0   0.0
  6.0  12.0  18.0  24.0  30.0  36.0
  ```
- provides the same displayed form but the underlying, "parent" array is 7 by 3
- ```julia
- julia> ALparent = ArfpL.data
+provides the same displayed form but the underlying, "parent" array is 7 by 3
+```julia
+julia> ALparent = ArfpL.data
 7×3 Matrix{Float64}:
  22.0  23.0  24.0
   1.0  29.0  30.0
@@ -81,17 +81,17 @@ julia> ArfpL = TriangularRFP(float(AL), :L).data
  5.0  10.0  15.0
  ```
 
- RFP storage is especially useful for large positive definite Hermitian matrices because the Cholesky factor can be evaluated nearly as quickly (by applying Level-3 BLAS to the blocks) as in full storage mode but requiring about half the storage.
+RFP storage is especially useful for large positive definite Hermitian matrices because the Cholesky factor can be evaluated nearly as quickly (by applying Level-3 BLAS to the blocks) as in full storage mode but requiring about half the storage.
 
- A trivial example is
- ```julia
- julia> A = [2. 1 2; 1 2 0; 1 0 2]
+A trivial example is
+```julia
+julia> A = [2. 1 2; 1 2 0; 1 0 2]
 3×3 Matrix{Float64}:
  2.0  1.0  2.0
  1.0  2.0  0.0
  1.0  0.0  2.0
 
- julia> cholesky(Hermitian(A, :L))
+julia> cholesky(Hermitian(A, :L))
 Cholesky{Float64, Matrix{Float64}}
 L factor:
 3×3 LowerTriangular{Float64, Matrix{Float64}}:
